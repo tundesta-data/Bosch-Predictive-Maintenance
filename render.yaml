@@ -1,0 +1,10 @@
+services:
+  - type: cron
+    name: bosch-ml-predictions
+    env: python
+    schedule: "0 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python predict.py
+    envVars:
+      - key: DATABASE_URL
+        sync: false
