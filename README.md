@@ -1,5 +1,3 @@
-# Bosch-Predictive-Maintenance
-
 # Bosch Rexroth AG — Predictive Maintenance ML Pipeline
 
 ## Overview
