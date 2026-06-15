@@ -18,13 +18,15 @@ engine = create_engine(DATABASE_URL)
 print("Connected to database")
 
 # ── Load tables ──────────────────────────────────────────────
-sensor    = pd.read_sql('SELECT * FROM sensor_telemetry', engine)
-equipment = pd.read_sql('SELECT * FROM equipment_master', engine)
+sensor = pd.read_sql(
+    'SELECT * FROM sensor_telemetry', engine
+)
 print(f"Loaded {len(sensor):,} sensor rows")
 
 # ── Clean ────────────────────────────────────────────────────
 sensor['timestamp']    = pd.to_datetime(sensor['timestamp'])
 sensor['failure_mode'] = sensor['failure_mode'].fillna('No Failure')
+
 for col in [
     'pressure_bar','temp_celsius','flow_lpm',
     'vibration_x_g','vibration_y_g','pump_rpm',
@@ -32,23 +34,31 @@ for col in [
 ]:
     sensor[col] = pd.to_numeric(sensor[col], errors='coerce')
 
-sensor = sensor.dropna(subset=['rul_hours']).sort_values(
+sensor = sensor.dropna(
+    subset=['rul_hours']
+).sort_values(
     ['machine_id','timestamp']
 ).reset_index(drop=True)
 
-# ── Build features ───────────────────────────────────────────
+# ── Build all features on full sensor dataframe ──────────────
 for col, name in [
-    ('pressure_bar','pressure'),('temp_celsius','temp'),
-    ('vibration_x_g','vibration'),('flow_lpm','flow')
+    ('pressure_bar','pressure'),
+    ('temp_celsius','temp'),
+    ('vibration_x_g','vibration'),
+    ('flow_lpm','flow')
 ]:
     sensor[f'{name}_avg_10'] = (
         sensor.groupby('machine_id')[col]
-        .transform(lambda x: x.rolling(10, min_periods=1).mean())
+        .transform(
+            lambda x: x.rolling(10, min_periods=1).mean()
+        )
     )
     sensor[f'{name}_std_10'] = (
         sensor.groupby('machine_id')[col]
         .transform(
-            lambda x: x.rolling(10, min_periods=1).std().fillna(0)
+            lambda x: x.rolling(
+                10, min_periods=1
+            ).std().fillna(0)
         )
     )
 
@@ -67,7 +77,46 @@ sensor['total_dangers']     = (
     sensor['vibration_danger'] + sensor['flow_danger']
 )
 
-# 30-reading trend features
+sensor['rul_change'] = (
+    sensor.groupby('machine_id')['rul_hours']
+    .transform(lambda x: x.diff().fillna(0))
+)
+
+# RUL rolling features on full sensor
+sensor['rul_avg_60'] = (
+    sensor.groupby('machine_id')['rul_hours']
+    .transform(
+        lambda x: x.rolling(60, min_periods=1).mean()
+    )
+)
+
+sensor['rul_drop_rate'] = (
+    sensor.groupby('machine_id')['rul_hours']
+    .transform(
+        lambda x: x.diff().rolling(
+            10, min_periods=1
+        ).mean().fillna(0)
+    )
+)
+
+sensor['pressure_excess'] = (
+    sensor['pressure_bar'] - 100
+).clip(lower=0)
+
+sensor['danger_hours'] = (
+    sensor.groupby('machine_id')['rul_hours']
+    .transform(
+        lambda x: (x < 48).rolling(
+            60, min_periods=1
+        ).sum()
+    )
+)
+
+sensor['total_operating_hours'] = (
+    sensor.groupby('machine_id').cumcount() + 1
+)
+
+# 30-reading trend features for honest classifier
 sensor['pressure_avg_30'] = (
     sensor.groupby('machine_id')['pressure_bar']
     .transform(lambda x: x.rolling(30, min_periods=1).mean())
@@ -80,9 +129,15 @@ sensor['temp_avg_30'] = (
     sensor.groupby('machine_id')['temp_celsius']
     .transform(lambda x: x.rolling(30, min_periods=1).mean())
 )
-sensor['pressure_trend'] = sensor['pressure_avg_30'] - sensor['pressure_avg_10']
-sensor['flow_trend']     = sensor['flow_avg_30']     - sensor['flow_avg_10']
-sensor['temp_trend']     = sensor['temp_avg_30']     - sensor['temp_avg_10']
+sensor['pressure_trend'] = (
+    sensor['pressure_avg_30'] - sensor['pressure_avg_10']
+)
+sensor['flow_trend'] = (
+    sensor['flow_avg_30'] - sensor['flow_avg_10']
+)
+sensor['temp_trend'] = (
+    sensor['temp_avg_30'] - sensor['temp_avg_10']
+)
 
 sensor['consec_flow_low'] = (
     sensor.groupby('machine_id')['flow_danger']
@@ -101,14 +156,9 @@ sensor['consec_pressure_high'] = (
     ) * sensor['pressure_danger']
 )
 
-# ── Load honest models ───────────────────────────────────────
-rul_model       = joblib.load('rul_model.pkl')
-clf_model       = joblib.load('honest_failure_model.pkl')
-le              = joblib.load('honest_label_encoder.pkl')
-honest_features = joblib.load('honest_features.pkl')
-print("Models loaded")
+print("All features built")
 
-# RUL improved features
+# ── Feature lists ────────────────────────────────────────────
 improved_features = [
     'pressure_bar','temp_celsius','flow_lpm',
     'vibration_x_g','vibration_y_g','pump_rpm',
@@ -117,59 +167,57 @@ improved_features = [
     'vibration_avg_10','flow_avg_10',
     'pressure_std_10','temp_std_10',
     'vibration_std_10','flow_std_10',
+    'rul_avg_60','rul_drop_rate',
+    'pressure_excess','danger_hours',
+    'total_operating_hours',
     'hour','shift_num','total_dangers','month_num'
 ]
 
-# ── Latest reading per machine ───────────────────────────────
+honest_features = [
+    'pressure_bar','temp_celsius','flow_lpm',
+    'vibration_x_g','vibration_y_g','pump_rpm',
+    'pressure_avg_10','temp_avg_10',
+    'vibration_avg_10','flow_avg_10',
+    'pressure_std_10','temp_std_10',
+    'vibration_std_10','flow_std_10',
+    'pressure_avg_30','flow_avg_30','temp_avg_30',
+    'pressure_trend','flow_trend','temp_trend',
+    'consec_flow_low','consec_pressure_high',
+    'pressure_danger','temp_danger',
+    'vibration_danger','flow_danger',
+    'total_dangers','hour','shift_num','month_num'
+]
+
+# ── Load models ──────────────────────────────────────────────
+rul_model   = joblib.load('rul_model.pkl')
+clf_model   = joblib.load('honest_failure_model.pkl')
+le          = joblib.load('honest_label_encoder.pkl')
+print("Models loaded")
+
+# ── Get latest reading per machine ───────────────────────────
 latest = (
     sensor.sort_values('timestamp')
     .groupby('machine_id').last()
     .reset_index()
 )
 
-rul_avg = (
-    sensor.sort_values('timestamp')
-    .groupby('machine_id')['rul_hours']
-    .apply(lambda x: x.rolling(60, min_periods=1).mean().iloc[-1])
-    .reset_index().rename(columns={'rul_hours':'rul_avg_60'})
+# Fill any missing columns with 0
+all_needed = list(
+    set(improved_features + honest_features)
 )
-rul_drop = (
-    sensor.sort_values('timestamp')
-    .groupby('machine_id')['rul_hours']
-    .apply(lambda x: x.diff().mean())
-    .reset_index().rename(columns={'rul_hours':'rul_drop_rate'})
-)
-danger = (
-    sensor.groupby('machine_id')['rul_hours']
-    .apply(lambda x: (x < 48).sum())
-    .reset_index().rename(columns={'rul_hours':'danger_hours'})
-)
-total_hrs = (
-    sensor.groupby('machine_id').size()
-    .reset_index().rename(columns={0:'total_operating_hours'})
-)
-
-latest = latest.merge(rul_avg,    on='machine_id', how='left')
-latest = latest.merge(rul_drop,   on='machine_id', how='left')
-latest = latest.merge(danger,     on='machine_id', how='left')
-latest = latest.merge(total_hrs,  on='machine_id', how='left')
-
-latest['pressure_excess'] = (latest['pressure_bar'] - 100).clip(lower=0)
-latest['month_num']       = pd.to_datetime(latest['timestamp']).dt.month
-latest['rul_change']      = 0.0
-
-all_cols = list(set(honest_features + improved_features))
-for col in all_cols:
+for col in all_needed:
     if col not in latest.columns:
         latest[col] = 0.0
-latest[all_cols] = latest[all_cols].fillna(0)
+latest[all_needed] = latest[all_needed].fillna(0)
 
-# ── Predictions ──────────────────────────────────────────────
-avail = [c for c in improved_features if c in latest.columns]
+print(f"Latest features ready — {len(latest)} machines")
+
+# ── RUL prediction ───────────────────────────────────────────
 latest['predicted_rul_hours'] = (
-    rul_model.predict(latest[avail])
+    rul_model.predict(latest[improved_features])
 ).round(2)
 
+# ── Failure mode prediction ──────────────────────────────────
 latest['predicted_failure_mode'] = le.inverse_transform(
     clf_model.predict(latest[honest_features])
 )
@@ -181,8 +229,10 @@ proba_df = pd.DataFrame(
 )
 non_normal = [c for c in le.classes_ if c != 'No Failure']
 
-latest['likely_failure_mode']       = proba_df[non_normal].idxmax(axis=1).values
-latest['failure_probability_pct']   = (
+latest['likely_failure_mode'] = (
+    proba_df[non_normal].idxmax(axis=1).values
+)
+latest['failure_probability_pct'] = (
     pd.Series(proba_df[non_normal].max(axis=1).values * 100)
     .clip(lower=5.0).round(2).values
 )
@@ -190,6 +240,7 @@ latest['no_failure_probability_pct'] = (
     proba_df['No Failure'].values * 100
 ).round(2)
 
+# ── Helper functions ─────────────────────────────────────────
 def classify_risk(r):
     if r<=24:    return 'CRITICAL'
     elif r<=48:  return 'HIGH RISK'
@@ -206,7 +257,8 @@ def get_action(r):
 
 def format_countdown(h):
     if h<=0: return 'ALREADY SHUT DOWN'
-    s=int(h*3600); d=s//86400; hr=(s%86400)//3600; m=(s%3600)//60
+    s=int(h*3600)
+    d=s//86400; hr=(s%86400)//3600; m=(s%3600)//60
     return f"{d:02d}d {hr:02d}h {m:02d}min"
 
 def urgency_window(h):
