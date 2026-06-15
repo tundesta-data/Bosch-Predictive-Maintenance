@@ -1,0 +1,27 @@
+name: Bosch ML Predictions
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy scikit-learn xgboost sqlalchemy psycopg2-binary joblib imbalanced-learn
+
+      - name: Run predictions
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python predict.py
