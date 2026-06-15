@@ -14,7 +14,7 @@ Runs every hour automatically:
 
 ## Models
 - XGBoost RUL Regressor (MAE: 14.87 hours)
-- XGBoost Failure Classifier (F1: 99.97%)
+- XGBoost Failure Classifier (Honest F1: 99.49% — no data leakage)
 
 ## Tools
 PostgreSQL · Python · XGBoost · Render.com
