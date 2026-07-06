@@ -18,3 +18,11 @@ Runs every hour automatically:
 
 ## Tools
 PostgreSQL · Python · XGBoost · Render.com
+
+## 🚀 Live Demo
+👉 [View Live Dashboard](https://bosch-predictive-maintenance-heveurb37app8889t9dgrus.streamlit.app/)
+
+## ☁️ Cloud Architecture
+- **Database:** PostgreSQL on Neon.tech (864K sensor rows)
+- **ML Pipeline:** Automated hourly predictions via Render.com cron job
+- **Dashboard:** Live Streamlit app pulling real-time predictions
