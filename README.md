@@ -223,15 +223,43 @@ The full pipeline is deployed across three cloud platforms:
 The Power BI dashboard includes 8 pages with 45+ DAX measures:
 
 * **Architecture Overview** — End-to-end cloud system diagram
-* **Executive Summary** — Cost savings, failure mode breakdown, downtime impact
-* **Fleet Health Overview** — Machine risk status, repair cost by failure mode
-* **Predictive Maintenance** — ML predictions table, RUL gauge, fleet health gauge
-* **Sensor Analysis** — Pressure, temperature, vibration and flow trends (5-day average)
-* **Maintenance & Cost Report** — Reactive vs preventive cost comparison
-* **Operator Daily View** — Live anomaly count, sensor breach status, operator action table
-* **KPI Performance Report** — Validation metrics, pre vs post system comparison, business ROI
+* **Executive Summary** — Cost savings, failure mode breakdown
+* **Fleet Health Overview** — Machine risk status, repair costs
+* **Predictive Maintenance** — ML predictions table, RUL gauge
+* **Sensor Analysis** — Pressure, temperature, vibration trends
+* **Maintenance & Cost Report** — Reactive vs preventive costs
+* **Operator Daily View** — Live anomaly count, operator actions
+* **KPI Performance Report** — Validation metrics, business ROI
 
-**Connection:** DirectQuery → Neon PostgreSQL (live cloud data)
+**Connection:** DirectQuery → Local PostgreSQL
+
+---
+
+#### Dashboard Screenshots
+
+**Architecture Overview**
+![Architecture](<img width="662" height="383" alt="Screenshot 2026-07-07 110721" src="https://github.com/user-attachments/assets/04e94611-00a9-42db-b076-8feba8331b51" />
+)
+
+**Executive Summary**
+![Executive Summary](<img width="661" height="381" alt="Screenshot 2026-07-07 111703" src="https://github.com/user-attachments/assets/518fe864-aa15-4223-a101-574772425f38" />
+)
+
+**Fleet Health Overview**
+![Fleet Health](<img width="661" height="380" alt="Screenshot 2026-07-07 110916" src="https://github.com/user-attachments/assets/18fa80f8-6653-4a86-82cf-d88aaf790355" />
+)
+
+**Predictive Maintenance**
+![Predictive Maintenance](<img width="661" height="383" alt="Screenshot 2026-07-07 111030" src="https://github.com/user-attachments/assets/18ff40e3-39ec-486e-9e48-a4fb5d57f47d" />
+)
+
+**Sensor Analysis**
+![Sensor Analysis](<img width="659" height="382" alt="Screenshot 2026-07-07 111149" src="https://github.com/user-attachments/assets/2ec4b0f5-2172-4aba-b589-53b1f4f7cbd9" />
+)
+
+**KPI Performance Report**
+![KPI Report](<img width="662" height="380" alt="Screenshot 2026-07-07 111249" src="https://github.com/user-attachments/assets/904947b4-9f8c-46b5-b803-8126a1852c58" />
+)
 
 ---
 
