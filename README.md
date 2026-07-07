@@ -238,28 +238,28 @@ The Power BI dashboard includes 8 pages with 45+ DAX measures:
 #### Dashboard Screenshots
 
 **Architecture Overview**
-![Architecture](<img width="662" height="383" alt="Screenshot 2026-07-07 110721" src="https://github.com/user-attachments/assets/04e94611-00a9-42db-b076-8feba8331b51" />
-)
+<img width="662" height="383" alt="Screenshot 2026-07-07 110721" src="https://github.com/user-attachments/assets/04e94611-00a9-42db-b076-8feba8331b51" />
+
 
 **Executive Summary**
-![Executive Summary](<img width="661" height="381" alt="Screenshot 2026-07-07 111703" src="https://github.com/user-attachments/assets/518fe864-aa15-4223-a101-574772425f38" />
-)
+<img width="661" height="381" alt="Screenshot 2026-07-07 111703" src="https://github.com/user-attachments/assets/518fe864-aa15-4223-a101-574772425f38" />
+
 
 **Fleet Health Overview**
-![Fleet Health](<img width="661" height="380" alt="Screenshot 2026-07-07 110916" src="https://github.com/user-attachments/assets/18fa80f8-6653-4a86-82cf-d88aaf790355" />
-)
+<img width="661" height="380" alt="Screenshot 2026-07-07 110916" src="https://github.com/user-attachments/assets/18fa80f8-6653-4a86-82cf-d88aaf790355" />
+
 
 **Predictive Maintenance**
-![Predictive Maintenance](<img width="661" height="383" alt="Screenshot 2026-07-07 111030" src="https://github.com/user-attachments/assets/18ff40e3-39ec-486e-9e48-a4fb5d57f47d" />
-)
+<img width="661" height="383" alt="Screenshot 2026-07-07 111030" src="https://github.com/user-attachments/assets/18ff40e3-39ec-486e-9e48-a4fb5d57f47d" />
+
 
 **Sensor Analysis**
-![Sensor Analysis](<img width="659" height="382" alt="Screenshot 2026-07-07 111149" src="https://github.com/user-attachments/assets/2ec4b0f5-2172-4aba-b589-53b1f4f7cbd9" />
-)
+<img width="659" height="382" alt="Screenshot 2026-07-07 111149" src="https://github.com/user-attachments/assets/2ec4b0f5-2172-4aba-b589-53b1f4f7cbd9" />
+
 
 **KPI Performance Report**
-![KPI Report](<img width="662" height="380" alt="Screenshot 2026-07-07 111249" src="https://github.com/user-attachments/assets/904947b4-9f8c-46b5-b803-8126a1852c58" />
-)
+<img width="662" height="380" alt="Screenshot 2026-07-07 111249" src="https://github.com/user-attachments/assets/904947b4-9f8c-46b5-b803-8126a1852c58" />
+
 
 ---
 
